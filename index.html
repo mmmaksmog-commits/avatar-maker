@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Аватар по имени — генератор</title>
+  <meta name="description" content="Из имени или ника рождается уникальный геометрический аватар или логотип. Пять стилей, экспорт в PNG и SVG.">
+  <meta name="theme-color" content="#111014">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #111014; --card: #1b1a20; --card2: #24232b; --line: #2f2d38; --text: #f3f1f7; --muted: #9a96a8; --acc: #ff7a59; color-scheme: dark; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Onest, system-ui, sans-serif; }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    .app { max-width: 1000px; margin: 0 auto; padding: calc(22px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom)); }
+    h1 { margin: 0 0 6px; font: 800 clamp(26px, 7vw, 38px)/1.1 Unbounded, sans-serif; letter-spacing: -0.02em; }
+    .sub { margin: 0 0 20px; color: var(--muted); }
+    .main { display: grid; gap: 16px; }
+    @media (min-width: 860px) { .main { grid-template-columns: 340px minmax(0, 1fr); align-items: start; } }
+    .card { padding: 20px; border-radius: 24px; background: var(--card); border: 1px solid var(--line); min-width: 0; }
+    .preview { display: grid; place-items: center; padding: 26px; border-radius: 24px; background: repeating-conic-gradient(#1f1e25 0 25%, #18171d 0 50%) 0 0 / 22px 22px; }
+    .preview svg { width: min(260px, 100%); height: auto; filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.45)); }
+    .name { width: 100%; margin-top: 14px; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card2); font: 600 20px Onest, sans-serif; text-align: center; outline: none; }
+    .name:focus { border-color: var(--acc); }
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .btn { padding: 12px; border: 0; border-radius: 12px; background: var(--acc); color: #1d0e08; font-weight: 800; }
+    .btn--ghost { background: var(--card2); color: var(--text); border: 1px solid var(--line); }
+    .btn.full { grid-column: 1 / -1; }
+    h3 { margin: 0 0 10px; font: 500 15px Unbounded, sans-serif; }
+    .styles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+    .style { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 10px; border: 1.5px solid var(--line); border-radius: 18px; background: var(--card2); font-weight: 600; font-size: 13px; }
+    .style svg { width: 62px; height: 62px; }
+    .style.on { border-color: var(--acc); }
+    .opts { display: grid; gap: 14px; margin-top: 18px; }
+    .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+    .seg button { flex: 1; min-width: 70px; padding: 9px 8px; border: 1.5px solid var(--line); border-radius: 12px; background: transparent; font-weight: 600; font-size: 13px; }
+    .seg button.on { border-color: var(--acc); background: rgba(255, 122, 89, 0.12); }
+    .pal { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pal button { display: flex; padding: 3px; border: 2px solid transparent; border-radius: 12px; background: var(--card2); }
+    .pal button.on { border-color: var(--acc); }
+    .pal i { width: 12px; height: 26px; }
+    .pal i:first-child { border-radius: 8px 0 0 8px; } .pal i:last-child { border-radius: 0 8px 8px 0; }
+    .pal .auto { padding: 0 12px; height: 36px; align-items: center; font-size: 13px; font-weight: 700; color: var(--muted); }
+    .lbl { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+    .team { margin-top: 16px; }
+    .team textarea { width: 100%; min-height: 64px; padding: 12px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card2); resize: vertical; outline: none; }
+    .teamgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 12px; margin-top: 12px; }
+    .teamgrid div { display: grid; justify-items: center; gap: 6px; font-size: 12px; color: var(--muted); text-align: center; word-break: break-word; }
+    .teamgrid svg { width: 64px; height: 64px; cursor: pointer; }
+    .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); padding: 12px 18px; border-radius: 14px; background: var(--text); color: var(--bg); font-weight: 700; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    .back { display: inline-block; margin-top: 18px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>🎨 Аватар по имени</h1>
+  <p class="sub">Каждое имя даёт свой узор. Одно и то же имя всегда даёт один и тот же аватар, поэтому его можно восстановить в любой момент.</p>
+  <div class="main">
+    <section class="card">
+      <div class="preview" id="preview"></div>
+      <input class="name" id="name" value="Алиса" maxlength="40" aria-label="Имя или ник" placeholder="Имя или ник">
+      <div class="btns">
+        <button class="btn" id="png">Скачать PNG</button>
+        <button class="btn btn--ghost" id="svg">Скачать SVG</button>
+        <button class="btn btn--ghost full" id="dice">🎲 Другой вариант</button>
+      </div>
+    </section>
+    <section class="card">
+      <h3>Стиль</h3>
+      <div class="styles" id="styles"></div>
+      <div class="opts">
+        <div><div class="lbl">Форма</div><div class="seg" id="shape"><button data-v="circle" class="on">Круг</button><button data-v="squircle">Скруглённый</button><button data-v="square">Квадрат</button></div></div>
+        <div><div class="lbl">Инициалы</div><div class="seg" id="ini"><button data-v="auto" class="on">По стилю</button><button data-v="on">Показать</button><button data-v="off">Скрыть</button></div></div>
+        <div><div class="lbl">Палитра</div><div class="pal" id="pal"></div></div>
+      </div>
+      <div class="team">
+        <h3>Для всей команды</h3>
+        <textarea id="team" aria-label="Имена через запятую">Ольга, Дмитрий, Сергей, Марина, Тимур, Лиза</textarea>
+        <div class="teamgrid" id="teamgrid"></div>
+      </div>
+    </section>
+  </div>
+  <a class="back" href="/">← Портфолио</a>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const PALETTES = [
+    ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'], ['#0d1b2a', '#ff006e', '#fb5607', '#ffbe0b', '#3a86ff'],
+    ['#f1faee', '#e63946', '#a8dadc', '#457b9d', '#1d3557'], ['#2b2d42', '#8d99ae', '#edf2f4', '#ef233c', '#d90429'],
+    ['#fefae0', '#606c38', '#283618', '#dda15e', '#bc6c25'], ['#22223b', '#4a4e69', '#9a8c98', '#c9ada7', '#f2e9e4'],
+    ['#10002b', '#5a189a', '#9d4edd', '#e0aaff', '#ff9e00'], ['#fff1e6', '#ff595e', '#ffca3a', '#8ac926', '#1982c4'],
+    ['#03071e', '#370617', '#d00000', '#f48c06', '#ffba08'], ['#e8f1f2', '#13293d', '#006494', '#247ba0', '#1b98e0'],
+  ];
+  const STYLES = [['bauhaus', 'Баухаус'], ['pixels', 'Пиксели'], ['orbits', 'Орбиты'], ['blob', 'Капля'], ['mono', 'Монограмма'], ['waves', 'Волны']];
+  let style = 'bauhaus', shape = 'circle', ini = 'auto', pal = -1, salt = 0;
+
+  // хеш строки и детерминированный генератор случайных чисел
+  function cyrb53(str, seed = 0) {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  }
+  function mulberry(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  const initials = (n) => n.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function make(name, st = style, opts = {}) {
+    const key = name.trim().toLowerCase() || '?';
+    const seed = cyrb53(`${key}#${opts.salt ?? salt}`);
+    const R = mulberry(seed);
+    const ri = (n) => Math.floor(R() * n);
+    const P = [...PALETTES[(opts.pal ?? pal) >= 0 ? (opts.pal ?? pal) : seed % PALETTES.length]];
+    const bg = P.splice(ri(P.length), 1)[0];
+    const col = () => P[ri(P.length)];
+    const S = 100, id = `c${seed % 1e8}${st}`;
+    const shp = opts.shape ?? shape;
+    const clip = shp === 'circle' ? `<circle cx="50" cy="50" r="50"/>` : shp === 'squircle' ? `<rect width="100" height="100" rx="26"/>` : `<rect width="100" height="100"/>`;
+    let body = '';
+    let showIni = { bauhaus: false, pixels: false, orbits: false, blob: true, mono: true, waves: false }[st];
+    const iniMode = opts.ini ?? ini;
+    if (iniMode === 'on') showIni = true; if (iniMode === 'off') showIni = false;
+
+    if (st === 'bauhaus') {
+      const n = 3, c = S / n;
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+        const X = x * c, Y = y * c, k = ri(6), f = col(), rot = ri(4) * 90;
+        const g = (inner) => `<g transform="rotate(${rot} ${X + c / 2} ${Y + c / 2})">${inner}</g>`;
+        if (k === 0) body += g(`<path d="M${X} ${Y}h${c}v${c}A${c} ${c} 0 0 1 ${X} ${Y}z" fill="${f}"/>`);
+        else if (k === 1) body += `<circle cx="${X + c / 2}" cy="${Y + c / 2}" r="${c * 0.42}" fill="${f}"/>`;
+        else if (k === 2) body += g(`<path d="M${X} ${Y + c}A${c / 2} ${c / 2} 0 0 1 ${X + c} ${Y + c}z" fill="${f}"/>`);
+        else if (k === 3) body += g(`<path d="M${X} ${Y}L${X + c} ${Y + c}H${X}z" fill="${f}"/>`);
+        else if (k === 4) body += `<rect x="${X + c * 0.18}" y="${Y + c * 0.18}" width="${c * 0.64}" height="${c * 0.64}" fill="${f}"/>`;
+        else body += g(`<rect x="${X}" y="${Y}" width="${c}" height="${c / 2}" fill="${f}"/>`);
+      }
+    } else if (st === 'pixels') {
+      const n = 7, c = 76 / n, off = 12, cols = [col(), col(), col()];
+      for (let y = 0; y < n; y++) for (let x = 0; x < Math.ceil(n / 2); x++) {
+        if (R() < 0.48) continue;
+        const f = cols[ri(3)];
+        for (const xx of new Set([x, n - 1 - x])) body += `<rect x="${off + xx * c + 0.6}" y="${off + y * c + 0.6}" width="${c - 1.2}" height="${c - 1.2}" rx="${c * 0.28}" fill="${f}"/>`;
+      }
+    } else if (st === 'orbits') {
+      const cx = 50 + (R() - 0.5) * 20, cy = 50 + (R() - 0.5) * 20;
+      for (let i = 7; i >= 1; i--) {
+        const r = i * 9 + R() * 4;
+        if (R() < 0.45) body += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col()}"/>`;
+        else { const len = 2 * Math.PI * r; body += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col()}" stroke-width="${3 + R() * 5}" stroke-dasharray="${len * (0.2 + R() * 0.6)} ${len}" stroke-linecap="round" transform="rotate(${R() * 360} ${cx} ${cy})"/>`; }
+      }
+      body += `<circle cx="${cx}" cy="${cy}" r="${4 + R() * 4}" fill="${col()}"/>`;
+    } else if (st === 'blob') {
+      const pts = 7, rad = [];
+      for (let i = 0; i < pts; i++) rad.push(30 + R() * 14);
+      const p = rad.map((r, i) => { const a = i / pts * Math.PI * 2; return [50 + Math.cos(a) * r, 50 + Math.sin(a) * r]; });
+      let d = '';
+      for (let i = 0; i < pts; i++) {
+        const p0 = p[(i - 1 + pts) % pts], p1 = p[i], p2 = p[(i + 1) % pts], p3 = p[(i + 2) % pts];
+        if (!i) d += `M${p1[0].toFixed(1)} ${p1[1].toFixed(1)}`;
+        d += `C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+      }
+      const a = col(); let b = col(); if (b === a) b = P[(P.indexOf(a) + 1) % P.length];
+      body += `<defs><linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
+        <path d="${d}z" fill="url(#g${id})" transform="rotate(${R() * 360} 50 50)"/>
+        <circle cx="${20 + R() * 60}" cy="${15 + R() * 20}" r="${4 + R() * 5}" fill="${col()}" opacity=".9"/>`;
+    } else if (st === 'mono') {
+      const f = col(), k = ri(3);
+      if (k === 0) for (let i = -100; i < 200; i += 12) body += `<line x1="${i}" y1="0" x2="${i + 100}" y2="100" stroke="${f}" stroke-width="4" opacity=".35"/>`;
+      else if (k === 1) for (let y = 6; y < 100; y += 12) for (let x = 6 + (y % 24 ? 6 : 0); x < 100; x += 12) body += `<circle cx="${x}" cy="${y}" r="1.8" fill="${f}" opacity=".5"/>`;
+      else body += `<circle cx="${R() * 100}" cy="${R() * 100}" r="${40 + R() * 20}" fill="${f}" opacity=".35"/>`;
+    } else if (st === 'waves') {
+      // слои плавных волн сверху вниз, цвета идут по кругу, чтобы соседние не совпадали
+      const n = 6, start = ri(P.length), freq = 1.5 + R() * 2.5;
+      for (let i = 0; i < n; i++) {
+        const y = 18 + i * 14 + R() * 4, amp = 2.5 + R() * 4, ph = R() * Math.PI * 2;
+        let d = `M0 ${y.toFixed(1)}`;
+        for (let x = 0; x <= 100; x += 4) d += ` L${x} ${(y + Math.sin(x / 100 * Math.PI * 2 * freq + ph) * amp).toFixed(1)}`;
+        body += `<path d="${d} V100 H0 Z" fill="${P[(start + i) % P.length]}"/>`;
+      }
+      body += `<circle cx="${22 + R() * 56}" cy="${10 + R() * 6}" r="${5 + R() * 4}" fill="${P[(start + n) % P.length]}"/>`;
+    }
+    if (showIni) {
+      const txt = initials(name);
+      const dark = (h) => { const n = parseInt(h.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) < 140; };
+      const fg = st === 'mono' ? (dark(bg) ? '#ffffff' : '#111111') : '#ffffff';
+      body += `<text x="50" y="50" dy=".35em" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="${txt.length > 1 ? 36 : 46}" fill="${fg}" ${st !== 'mono' ? 'style="paint-order:stroke" stroke="rgba(0,0,0,.18)" stroke-width="3"' : ''}>${esc(txt)}</text>`;
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${opts.size || 100}" height="${opts.size || 100}"><defs><clipPath id="${id}">${clip}</clipPath></defs><g clip-path="url(#${id})"><rect width="100" height="100" fill="${bg}"/>${body}</g></svg>`;
+  }
+
+  const name = () => $('name').value || '?';
+  function render() {
+    $('preview').innerHTML = make(name());
+    $('styles').innerHTML = STYLES.map(([k, t]) => `<button class="style ${k === style ? 'on' : ''}" data-s="${k}">${make(name(), k)}${t}</button>`).join('');
+    $('styles').querySelectorAll('[data-s]').forEach((b) => b.onclick = () => { style = b.dataset.s; render(); });
+    $('pal').innerHTML = `<button class="auto ${pal < 0 ? 'on' : ''}" data-p="-1">Авто</button>` + PALETTES.map((p, i) => `<button data-p="${i}" class="${pal === i ? 'on' : ''}" aria-label="Палитра ${i + 1}">${p.map((c) => `<i style="background:${c}"></i>`).join('')}</button>`).join('');
+    $('pal').querySelectorAll('[data-p]').forEach((b) => b.onclick = () => { pal = +b.dataset.p; render(); });
+    renderTeam();
+  }
+  function renderTeam() {
+    const names = $('team').value.split(/[,\n]/).map((s) => s.trim()).filter(Boolean).slice(0, 40);
+    $('teamgrid').innerHTML = names.map((n) => `<div data-n="${esc(n)}">${make(n)}${esc(n)}</div>`).join('');
+    $('teamgrid').querySelectorAll('[data-n]').forEach((d) => d.onclick = () => { $('name').value = d.dataset.n; salt = 0; render(); scrollTo({ top: 0, behavior: 'smooth' }); });
+  }
+  const seg = (id, set) => $(id).querySelectorAll('[data-v]').forEach((b) => b.onclick = () => { set(b.dataset.v); $(id).querySelectorAll('[data-v]').forEach((x) => x.classList.toggle('on', x === b)); render(); });
+  seg('shape', (v) => (shape = v)); seg('ini', (v) => (ini = v));
+  $('name').oninput = () => { salt = 0; render(); };
+  $('team').oninput = renderTeam;
+  $('dice').onclick = () => { salt++; render(); };
+
+  const fileName = (ext) => `avatar-${(name().trim() || 'avatar').replace(/[^\p{L}\p{N}]+/gu, '-').toLowerCase()}.${ext}`;
+  function download(blob, fname) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+  $('svg').onclick = () => { download(new Blob([make(name(), style, { size: 512 })], { type: 'image/svg+xml' }), fileName('svg')); toast('SVG сохранён'); };
+  $('png').onclick = () => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = 1024;
+      c.getContext('2d').drawImage(img, 0, 0, 1024, 1024);
+      c.toBlob((b) => { download(b, fileName('png')); toast('PNG 1024×1024 сохранён'); }, 'image/png');
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(make(name(), style, { size: 1024 }));
+  };
+  let tt; function toast(t) { $('toast').textContent = t; $('toast').classList.add('show'); clearTimeout(tt); tt = setTimeout(() => $('toast').classList.remove('show'), 2000); }
+  render();
+})();
+</script>
+</body>
+</html>
